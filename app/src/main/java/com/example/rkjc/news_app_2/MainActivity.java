@@ -1,97 +1,65 @@
 package com.example.rkjc.news_app_2;
 
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.example.rkjc.news_app_2.NetworkUtils;
-import com.example.rkjc.news_app_2.NewsItem;
-import com.example.rkjc.news_app_2.JsonUtils;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import android.widget.ProgressBar;
+import android.support.annotation.Nullable;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.view.View;
+import android.content.Context;
+import android.os.AsyncTask;
+import java.io.IOException;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText mSearchBoxEditText;
-    private TextView mUrlDisplayTextView;
-    private TextView mSearchResultsTextView;
-    private ProgressBar mProgressBar;
-    private static final String TAG = "MainActivity";
     private RecyclerView mRecyclerView;
     private NewsRecyclerViewAdapter mAdapter;
-    private ArrayList<NewsItem> articles = new ArrayList<>();
+    private ArrayList<NewsItem> news = new ArrayList<>();
+    private NewsItemViewModel mNewsViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRecyclerView = (RecyclerView)findViewById(R.id.news_recyclerview);
-        mAdapter = new NewsRecyclerViewAdapter(this, articles);
+        mRecyclerView = (RecyclerView) findViewById(R.id.news_recyclerview);
+        mNewsViewModel = ViewModelProviders.of(this).get(NewsItemViewModel.class);
+        mAdapter = new NewsRecyclerViewAdapter(this, news);
+
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setLayoutManager( new LinearLayoutManager(this));
+
+        mNewsViewModel.getAllNews().observe(this, new Observer<List<NewsItem>>() {
+            @Override
+            public void onChanged(@Nullable List<NewsItem> newsItems) {
+                mAdapter.setNews(newsItems);
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
-    private URL makeNewsSearchQuery() {
-        URL newSearchUrl = NetworkUtils.buildUrl();
-        String urlString = newSearchUrl.toString();
-        Log.d("mycode", urlString);
-        return newSearchUrl;
-    }
-
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
-        if (itemThatWasClickedId == R.id.get_news) {
-            URL url = makeNewsSearchQuery();
-            NewsQueryTask task = new NewsQueryTask();
-            task.execute(url);
-
+        if (itemThatWasClickedId == R.id.action_search) {
+            URL url = NetworkUtils.buildUrl("b3282c577785438a8c23efe931c987bb");
+            mNewsViewModel.syncNews(url);
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public class NewsQueryTask extends AsyncTask<URL, Void, String> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(URL... params) {
-            String newsappSearchResults = "";
-
-            try {
-                newsappSearchResults = NetworkUtils.getResponseFromHttpUrl(params[0]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return newsappSearchResults;
-        }
-
-        //sends the url string to JSONutils to be parsed
-        @Override
-        protected void onPostExecute(String s) {
-            Log.d("mycode", s);
-            super.onPostExecute(s);
-            articles = JsonUtils.parseNews(s);
-            mAdapter.mNewsItems.addAll(articles);
-            mAdapter.notifyDataSetChanged();
-
-        }
     }
 
     @Override

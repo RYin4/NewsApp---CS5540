@@ -1,96 +1,79 @@
 package com.example.rkjc.news_app_2;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.content.Context;
-import android.content.Intent;
 
-import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
-
-import java.util.ArrayList;
-
-
-
-
-import android.content.Context;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import com.example.rkjc.news_app_2.NewsItem;
-import org.w3c.dom.Text;
-import java.util.ArrayList;
-
-
-public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<NewsRecyclerViewAdapter.NewsItemViewHolder> {
+public class NewsRecyclerViewAdapter  extends RecyclerView.Adapter<NewsRecyclerViewAdapter.NewsViewHolder> {
 
     Context mContext;
-    ArrayList<NewsItem> mNewsItems;
+    List<NewsItem> mNews;
 
-    public NewsRecyclerViewAdapter(Context context, ArrayList<NewsItem> news) {
-        this.mContext = context;
-        this.mNewsItems = news;
+    public NewsRecyclerViewAdapter(Context mContext, ArrayList<NewsItem> mNews) {
+
+        this.mContext = mContext;
+        this.mNews = mNews;
+
     }
 
     @Override
-    public NewsRecyclerViewAdapter.NewsItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public NewsRecyclerViewAdapter.NewsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
 
-        View view = inflater.inflate(R.layout.news_item, parent, shouldAttachToParentImmediately);
-        NewsItemViewHolder viewHolder = new NewsItemViewHolder(view);
+        boolean attachToParent = false;
+        View view = inflater.inflate(R.layout.news_item, parent, attachToParent);
+
+        NewsViewHolder viewHolder = new NewsViewHolder(view);
+
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(NewsRecyclerViewAdapter.NewsItemViewHolder holder, int position) {
+    public void onBindViewHolder(NewsRecyclerViewAdapter.NewsViewHolder holder, int position) {
         holder.bind(position);
     }
 
-    @Override
-    public int getItemCount() {
-        return mNewsItems.size();
+    void setNews(List<NewsItem> news) {
+        mNews = news;
     }
 
-    public class NewsItemViewHolder extends RecyclerView.ViewHolder{
+    @Override
+    public int getItemCount() { return mNews.size();
+    }
+
+    public class NewsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title;
         TextView description;
         TextView date;
 
-        public NewsItemViewHolder(View itemView) {
+        public NewsViewHolder(View itemView) {
             super(itemView);
             title = (TextView) itemView.findViewById(R.id.title);
             description = (TextView) itemView.findViewById(R.id.description);
             date = (TextView) itemView.findViewById(R.id.date);
         }
 
-        void bind(final int listIndex) {
-            title.setText(mNewsItems.get(listIndex).getTitle());
-            description.setText(mNewsItems.get(listIndex).getDescription());
-            date.setText(mNewsItems.get(listIndex).getPublishedAt());
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Uri webpage = Uri.parse(mNewsItems.get(listIndex).getUrl());
-                    Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
-
-                    if(intent.resolveActivity(mContext.getPackageManager()) != null) {
-                        mContext.startActivity(intent);
-                    }
-                }
-            });
-
+        void bind( int listIndex) {
+            title.setText("Title: " + mNews.get(listIndex).getTitle());
+            description.setText("Description: " + mNews.get(listIndex).getDescription());
+            date.setText("Date: " + mNews.get(listIndex).getPublishedAt());
+            itemView.setOnClickListener(this);
         }
 
-
+        @Override
+        public void onClick(View view) {
+            String urlString = mNews.get(getAdapterPosition()).getUrl();
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+            mContext.startActivity(browserIntent);
+        }
     }
-
 }

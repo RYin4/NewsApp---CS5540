@@ -7,32 +7,25 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
-import android.net.Uri;
 import android.net.Uri.Builder;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.io.InputStream;
-import java.util.Scanner;
 
 public class NetworkUtils {
 
-    //Define the appropriate base_url and query_parameter constants
+    final static String base_url = "https://newsapi.org/v1/articles";
+
     final static String PARAM_SOURCE = "source";
     final static String source = "the-next-web";
-    final static String PARAM_APIKEY = "apiKey";
-    final static String NEWSAPI_BASE_URL = "https://newsapi.org/v1/articles";
-    final static String apiKey = "b3282c577785438a8c23efe931c987bb";
-    final static String PARAM_SORT = "sort";
-    final static String sortBy = "stars";
 
-    public static URL buildUrl() {
+    final static String PARAM_SORT = "sortBy";
+    final static String sortby = "top";
 
-        Uri builtUri = Uri.parse(NEWSAPI_BASE_URL).buildUpon()
+    final static String PARAM_KEY = "apiKey";
+
+    public static URL buildUrl(String apikey) {
+        Uri builtUri = Uri.parse(base_url).buildUpon()
                 .appendQueryParameter(PARAM_SOURCE, source)
-                .appendQueryParameter(PARAM_SORT, sortBy)
-                .appendQueryParameter(PARAM_APIKEY, apiKey)
+                .appendQueryParameter(PARAM_SORT, sortby)
+                .appendQueryParameter(PARAM_KEY, apikey)
                 .build();
 
         URL url = null;
@@ -64,19 +57,4 @@ public class NetworkUtils {
             urlConnection.disconnect();
         }
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,14 +1,13 @@
 package com.example.rkjc.news_app_2;
 
+import android.util.Log;
+import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.util.Log;
-import java.util.ArrayList;
 
 public class JsonUtils {
 
-    //may need to change string parameter to JSONobject
     public static ArrayList<NewsItem> parseNews(String jObject){
 
         ArrayList<NewsItem> newsItemList = new ArrayList<>();
@@ -28,5 +27,4 @@ public class JsonUtils {
         return newsItemList;
     }
 }
-
 
